@@ -6,7 +6,7 @@
 #                                                                                                                                                                         #
 ########################################################################################################################################################################### 
 
-def board():
+def initial_board():
     '''
     This function takes no input and returns a board which represents the initial state of a game of chess
     You should use whatever strings you decide for the pieces (and ownership) but you must be consistent!
@@ -27,34 +27,93 @@ def board():
     [2, 3, 4, 5, 6, 4, 3, 2]]           
 
     return board
+board=[[-2, -3, -4, -5, -6, -4, -3, -2],  #global variable-> to keep updating the state of the board
+    [-1, -1, -1, -1, -1, -1, -1, -1],  
+    [0, 0, 0, 0, 0, 0, 0, 0],          
+    [0, 0, 0, 0, 0, 0, 0, 0],          
+    [0, 0, 0, 0, 0, 0, 0, 0],          
+    [0, 0, 0, 0, 0, 0, 0, 0],          
+    [1, 1, 1, 1, 1, 1, 1, 1],         
+    [2, 3, 4, 5, 6, 4, 3, 2]]  
 
-def valid_move_empty_square(a,b,c,d):
-    current_board=board()
+def val_em_sq_st(player,original_square,target_square):
+    a,b=original_square #unpacks coordinates of original_square into var a & b
+    c,d=target_square
+
+    if player==+1:
+        print('white is moving')
+        for row in range(a,c+1): #loops all indexes along x axis ie each column index
+            for col in range(b,d+1):  #loops along y axis ie each row index
+                if board[row][col]!=0:
+                    return False
+        print('can move')
+        return True
+    
+    if player==-1:
+        print('black moves')
+        for row in range(a,c-1,-1): #loops all indexes along x axis ie each column index
+            for col in range(b,d-1,-1):  #loops along y axis ie each row index
+                if board[row][col]!=0:
+                    return False
+        print('can move')
+        return True
+    
+
+def val_em_sq_diag(player,original_square,target_square):
+    a,b=original_square #unpacks coordinates of original_square into var a & b
+    c,d=target_square
+    current_board=board #create the updated version of board as the current_board
+    if player==1:
+        if c*d>=0:
+
+            for row in range(a,c+1):  #loops all indexes along x axis ie each column index
+                for col in range(b,d+1):  #loops along y axis ie each row index
+                    if row!=col:    #selects diagonal sq
+                        return False
+            return True
+
+    if player==-1:
+        for row in range(a,c-1,-1):  #loops all indexes along x axis ie each column index
+            for col in range(b,d-1,-1):  #loops along y axis ie each row index
+                if row!=col:    #selects diagonal sq
+                    return False
+        return True
+
+def val_pawn(player,original_sq,target_sq):
+    a,b=original_sq
+    c,d=target_sq
+    if val_em_sq_st(player,original_sq,target_sq):
+        board[c][d]=board[a][b]
+    elif not val_em_sq_diag(player,original_sq,target_sq):
+        return None
+
+def valid_move_rook(player,original_sq,target_sq):  #takes in current position of the rook(row,col):a,b & target position c,d
+    #rook can only move if it's all zeros either in a straight file of rows:
+    a,b=original_sq #unpacks coordinates of original_square into var a & b
+    c,d=target_sq
+    if val_em_sq_st:
+        print('entered if cond')
+        board[c][d]=board[a][b]
+        board[a][b]=0
+        return board
+    else:
+        return 'Invalid move'
+
+def valid_move_bishop(a,b,c,d):
     for row in range(a,c+1):
         for col in range(b,d+1):
-            if current_board[row][col]!=0:
-                return False
-    return True
-
-def valid_move_rook(a,b,c,d): #takes in current position of the rook(row,col):a,b & target position c,d
-    #rook can only move if it's all zeros either in a straight file of rows:
-    # i might have to be fluent with 2 lists
-    current_board=board()
-    for i in range(a,c+1):  #(2,2)->(5,2) move south to north: loop through a(rows)
-        if current_board[i][b]!=0:
-            print("Not allowed") #going from a to c(moving in the same row)-> looping over -> checking all col indices bw a to c
-    print("Allowed movement of rook in this row until the target position")
-        # else:
-        #     print("Not allowed")
-    for i in range(b,d+1): #move from west to east: loop through cols
-        if current_board[a][i]!=0: # #going from b to d(moving in the same column)-> looping over -> checking all row indices bw b to d
-            print("not allowed")
-    print("Allowed movement of rook in this column until the target position")
-        # else:
-        #     print("not allowed")
-valid_move_rook(2,2,5,2)
+            if row==col:
+                return True
+    return False
 
 
+
+
+
+def changes_board():
+    current_board=initial_board()
+
+    '''any change in the board should be stored. but how?'''
 def any_check(board):
     '''
     This function will check to see if any piece is currently able to move to it's enemies king
@@ -77,19 +136,19 @@ def any_check(board):
     return winner
 
 
-def valid_move(board, player, origin=(0,0), destination=(0,2)):
-    '''
-    Parameters:
-        board: A 2d (8x8) list (of lists) which represents a certain state of the board
-        player: An Int representing the player (Player 1 -> 1, Player 2 -> -1)
-        origin: a pair of indeces (ints) representing a location on the board (0,0 would represent row 0, col 0 for example). We will try to move the piece that is at this location currently
-        desination: another pair of indeces (ints) representing a location on the board. This is the location we will try to move our piece to.
-    Returns:
-        valid: A boolean representing whether this was a valid move 
-    '''
+# def valid_move(board, player, origin=(0,0), destination=(0,2)):
+#     '''
+#     Parameters:
+#         board: A 2d (8x8) list (of lists) which represents a certain state of the board
+#         player: An Int representing the player (Player 1 -> 1, Player 2 -> -1)
+#         origin: a pair of indeces (ints) representing a location on the board (0,0 would represent row 0, col 0 for example). We will try to move the piece that is at this location currently
+#         desination: another pair of indeces (ints) representing a location on the board. This is the location we will try to move our piece to.
+#     Returns:
+#         valid: A boolean representing whether this was a valid move 
+#     '''
 
     
-    return valid
+#     return valid
 
 def move(board, player, origin=(0,0), destination=(0,2)):
     '''
