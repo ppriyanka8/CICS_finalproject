@@ -230,6 +230,28 @@ def valid_Bishop(board,a,b,c,d,current_player):
     # If not a valid diagonal, return false
     # else return loopDiagonalValid(...)
 
+def KnightValidMove(board, a,b,c,d,current_player):
+    validSquares=[(1,2),(2,1),(-1,2),(-2,1),(2,-1),(-2,-1),(-2,1),(-1,-2)]
+    if (c-a, d-b) in validSquares:
+        return True
+    print("Invalid move for Knight")
+    return False
+
+def isTargetSqEmpty(board, a,b,c,d,current_player): #board[c][d] here is 0 because it's empty
+    if not isSquareEmpty(board,c,d):
+        if board[c][d].color!=current_player:
+            return True
+        else:
+            return False
+    return True
+
+
+def valid_Knight(board, a,b,c,d,current_player):
+    if KnightValidMove(board, a,b,c,d,current_player):
+        if isTargetSqEmpty(board, a,b,c,d,current_player):
+            return True
+    return False
+
 class Piece:
     def __init__(self, Name, Color, Points):
         self.name=Name
@@ -246,8 +268,8 @@ class Piece:
         if self.name=="Bishop":
             return valid_Bishop(board,a,b,c,d,current_player)
         
-    #     if self.name=="Knight":
-    #         return None
+        if self.name=="Knight":
+            return valid_Knight(board,a,b,c,d,current_player)
         
     #     if self.name=="Queen":
     #         return None
