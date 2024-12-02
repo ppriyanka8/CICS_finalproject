@@ -152,6 +152,8 @@ def move_piece(board,a,b,c_pos,d,current_player):
 
 def is_in_checkmate(board, current_player):
     in_check = True
+    if not c.check(game_board, white_king_coords, black_king_coords, current_player):
+        return False
 
     # For every starting square on board
     for x in range(8):
@@ -186,6 +188,8 @@ def is_in_checkmate(board, current_player):
     print("Couldnt get out of check")
     return True # We iterated through every piece and none of their moves got us out of check
 
+# selected_x = a, selected_y = b, x = c, y = d
+# [Piece, prev_pos (a,b), curr_pos (c,d)]
 def can_en_passant(board, selected_x, selected_y, x, y, current_player):
     piece = board[selected_x][selected_y]
     if piece == 0:
@@ -193,7 +197,7 @@ def can_en_passant(board, selected_x, selected_y, x, y, current_player):
     if last_move[0] == 0:
         return False
     if piece.color == "White" and current_player=="White":
-        if selected_x==5:
+        if selected_x==4:
             if (y == selected_y + 1 or y == selected_y - 1) and x == selected_x + 1:
                 if last_move[0].name == "Pawn" and last_move[0].color == "Black" and last_move[2][1] == y and abs(last_move[2][0]-last_move[1][0])==2:
                     return True
@@ -366,7 +370,7 @@ promoting_color=None
 last_move=[0,0,0]
 white_won = False
 black_won = False
-
+# TODO: Implement stalemate function
 while game_display_running:
     # gameRunning=True
     display_chessboard(game_board, selected_x, selected_y, current_player)   #print the board  -> it's printing the matrix with objects
