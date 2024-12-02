@@ -1,6 +1,9 @@
 import sys
 import pygame
-import chess_NEW as c
+import chess_NEW as WC
+
+
+# ****************** CHESS BOARD DIMENSIONS *****************************
 
    #Dimensions for chessboard
 WIDTH, HEIGHT= 800,800
@@ -9,6 +12,9 @@ SQUARE_SIZE=WIDTH//8
 # BLACK=(0,0,0) #RGB for black
 LIGHT_COLOR=(240,217,181)
 DARK_COLOR=(181,136,99)
+
+
+# ****************** INITIALISING PYGAME, SCREEN AND LOADING CHESS PIECES *****************************
 
 pygame.init()   #initialise all pygame modules
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  #initialise screen
@@ -44,32 +50,39 @@ B_Knight=pygame.transform.scale(B_Knight,(SQUARE_SIZE,SQUARE_SIZE))
 B_Queen=pygame.transform.scale(B_Queen,(SQUARE_SIZE,SQUARE_SIZE))
 B_King=pygame.transform.scale(B_King,(SQUARE_SIZE,SQUARE_SIZE))
 
-class Piece:
-    def __init__(self, Name, Color, Points):
-        self.name=Name
-        self.color=Color
-        self.points=Points
 
-    def can_move(self, board, a, b, c_pos, d, current_player ):
-        if self.name=="Pawn":
-            return c.valid_Pawn(board, a, b, c_pos, d, current_player)  #it returns whatever gets returned from that fn
+# ****************** DEFINED "PIECE" CLASS  *****************************
+
+# class Piece:
+#     def __init__(self, Name, Color, Points):
+#         self.name=Name
+#         self.color=Color
+#         self.points=Points
+
+#     def can_move(self, board, a, b, c_pos, d, current_player ):
+#         if self.name=="Pawn":
+#             return WC.valid_Pawn(board, a, b, c_pos, d, current_player)  #it returns whatever gets returned from that fn
         
-        if self.name=="Rook":
-            return c.valid_Rook(board,a,b,c_pos,d,current_player)  #the function valid_rook is not defined outside the scope of this class. do i need to pass as an argument in can_move method
+#         if self.name=="Rook":
+#             return WC.valid_Rook(board,a,b,c_pos,d,current_player)  #the function valid_rook is not defined outside the scope of this class. do i need to pass as an argument in can_move method
         
-        if self.name=="Bishop":
-            return c.valid_Bishop(board,a,b,c_pos,d,current_player)
+#         if self.name=="Bishop":
+#             return WC.valid_Bishop(board,a,b,c_pos,d,current_player)
         
-        if self.name=="Knight":
-            return c.valid_Knight(board,a,b,c_pos,d,current_player)
+#         if self.name=="Knight":
+#             return WC.valid_Knight(board,a,b,c_pos,d,current_player)
         
-        if self.name=="Queen":
-            return c.valid_Queen(board,a,b,c_pos,d,current_player)
+#         if self.name=="Queen":
+#             return WC.valid_Queen(board,a,b,c_pos,d,current_player)
         
-        if self.name=="King":
-            return c.valid_King(board,a,b,c_pos,d,current_player)
+#         if self.name=="King":
+#             return WC.valid_King(board,a,b,c_pos,d,current_player)
+
+
+# ****************** DEFINED DISPLAY BOARD FUNCTION  ***********************************
 
 #Display board function
+
 def display_chessboard(board, selected_x, selected_y, current_player):
     # Draw the chessboard and pieces using the disaplay board logic
     for i in range(8):
@@ -152,7 +165,7 @@ def move_piece(board,a,b,c_pos,d,current_player):
 
 def is_in_checkmate(board, current_player):
     in_check = True
-    if not c.check(game_board, white_king_coords, black_king_coords, current_player):
+    if not WC.check(game_board, white_king_coords, black_king_coords, current_player):
         return False
 
     # For every starting square on board
@@ -168,14 +181,14 @@ def is_in_checkmate(board, current_player):
                         if x == i and y == j:
                             continue
                         # If the target square cannot be moved to, skip
-                        if not item.can_move(board, x, y, i, j, current_player):
+                        if not WC.can_move(item.name, board, x, y, i, j, current_player):   #?????
                             continue
                         # Otherwise, move the piece, see if we're in check still, move it back. Return False (not in checkmate)
                         # if the move got us out of check.
                         item_at_target = board[i][j]
                         move_piece(game_board, x, y, i, j, current_player)
                         # If the current player's king is in check, save that information
-                        if not c.check(game_board, white_king_coords, black_king_coords, current_player):
+                        if not WC.check(game_board, white_king_coords, black_king_coords, current_player):
                             print(f"{current_player} moving from {x,y} to {i,j} gets us out of check")
                             in_check = False
                         # Always move the piece back. We don't want to make a move on behalf of the player, we're just testing
@@ -188,8 +201,11 @@ def is_in_checkmate(board, current_player):
     print("Couldnt get out of check")
     return True # We iterated through every piece and none of their moves got us out of check
 
+
+# ****************** DEFINED FUNCTIONS: EN PASSANT, CASTLING   ***********************************
+
 # selected_x = a, selected_y = b, x = c, y = d
-# [Piece, prev_pos (a,b), curr_pos (c,d)]
+# last_move format: [Piece, prev_pos (a,b), curr_pos (c,d)]
 def can_en_passant(board, selected_x, selected_y, x, y, current_player):
     piece = board[selected_x][selected_y]
     if piece == 0:
@@ -216,7 +232,7 @@ def can_castle(board, selected_x, selected_y, x, y, current_player):
     elif piece.color != current_player:
         return False
     # If we are in check, we can't castle
-    elif c.check(game_board, white_king_coords, black_king_coords, current_player):
+    elif WC.check(game_board, white_king_coords, black_king_coords, current_player):
         return False
     else:
         # If your king has moved already, it can't castle
@@ -236,12 +252,12 @@ def can_castle(board, selected_x, selected_y, x, y, current_player):
         if current_player == "Black":
             if black_kingside_rook_has_moved:
                 return False
-            if c.check(game_board, white_king_coords, (7,2), current_player):
+            if WC.check(game_board, white_king_coords, (7,2), current_player):
                 return False
         else:
             if white_kingside_rook_has_moved:
                 return False
-            if c.check(game_board, (0,2), black_king_coords, current_player):
+            if WC.check(game_board, (0,2), black_king_coords, current_player):
                 return False
         coords_to_check = ((x,1),(x,2))
     else:
@@ -249,12 +265,12 @@ def can_castle(board, selected_x, selected_y, x, y, current_player):
         if current_player == "Black":
             if black_queenside_rook_has_moved:
                 return False
-            if c.check(game_board, white_king_coords, (7,4), current_player):
+            if WC.check(game_board, white_king_coords, (7,4), current_player):
                 return False
         else:
             if white_queenside_rook_has_moved:
                 return False
-            if c.check(game_board, (0,4), black_king_coords, current_player):
+            if WC.check(game_board, (0,4), black_king_coords, current_player):
                 return False
         coords_to_check = ((x,4),(x,5),(x,6))
     
@@ -299,6 +315,10 @@ def get_castling_rook_end_coords(y, current_player):
             return (7,2)
         else:
             return (7,4)
+        
+
+# ****************** DEFINED FUNCTIONS: MOUSE_CLICK, DSIPLAY-PROMOTION-PIECES, SHOW-WINNER-TEXT  ***********************************
+
 clock = pygame.time.Clock()
 
 def mouse_click(current_player):
@@ -347,32 +367,40 @@ def show_winner_text():
     # Blit the text to the screen
     screen.blit(text, text_rect)
 
-# *****************
-game_board=c.initial_board()  #initialise the board
-current_player="White"
 
-white_king_coords = (0,3)
-white_king_has_moved = False
-white_queenside_rook_has_moved = False
-white_kingside_rook_has_moved = False
-black_king_coords = (7,3)
+# ****************** START THE MAIN GAME CODE: INITIALISED NECESSARY VARIABLES   ***********************************
+
+
+game_board=WC.initial_board()    #initialise the board 
+current_player="White"           #set the current_player as White
+
+white_king_coords = (0,3)                     #start tracking white king coordinates to keep track of ....
+white_king_has_moved = False                  #track whether white king has moved
+white_queenside_rook_has_moved = False        #track whether white queenside rook has moved to track Castling
+white_kingside_rook_has_moved = False        #track whether white kingside king has moved to track castling
+black_king_coords = (7,3)             
 black_king_has_moved = False
 black_queenside_rook_has_moved = False
 black_kingside_rook_has_moved = False
 
-game_display_running=True
-selected_x = None
-selected_y = None
-current_player_in_check=False
-is_promoting=False
-promoting_pawn_pos=None
-promoting_color=None
-last_move=[0,0,0]
-white_won = False
+game_display_running=True       #game-display-running variable keeps updating the screen until is true
+selected_x = None               #????
+selected_y = None               #????
+current_player_in_check=False        #current-player-in-check var
+is_promoting=False                    #is-promoting var
+promoting_pawn_pos=None        #promoting-pawn-pos var : tracks the position of the pawn which is to be promoted-> to bring the promoted pieces at the same square
+promoting_color=None             #promoting-pawn-pos var : tracks the color of the pawn which is to be promoted-> to bring the same color pieces 
+last_move=[0,0,0]             # last-move var tracks every last move on the board; irrespective of color. gets updated after each can_move True
+white_won = False             #initialised white-won variable
 black_won = False
+
+
 # TODO: Implement stalemate function
-while game_display_running:
-    # gameRunning=True
+
+# ****************** Main game loop   ***********************************
+
+while game_display_running:     #WHILE game-display-running==True: screen will keep updating
+    
     display_chessboard(game_board, selected_x, selected_y, current_player)   #print the board  -> it's printing the matrix with objects
     if is_promoting:
         display_promotion_pieces(current_player)
@@ -400,13 +428,13 @@ while game_display_running:
                     y = 7-y
                 if x == 3 and y >= 0 and y < 4:
                     if y == 0:
-                        game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = Piece("Knight", promoting_color, 3)
+                        game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = WC.Piece("Knight", promoting_color, 3)
                     elif y == 1:
-                        game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = Piece("Bishop", promoting_color, 3)
+                        game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = WC.Piece("Bishop", promoting_color, 3)
                     elif y == 2:
-                        game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = Piece("Rook", promoting_color, 5)
+                        game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = WC.Piece("Rook", promoting_color, 5)
                     elif y == 3:
-                        game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = Piece("Queen", promoting_color, 9)
+                        game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = WC.Piece("Queen", promoting_color, 9)
                     is_promoting = False
                     promoting_pawn_pos = None
                     promoting_color = None
@@ -440,7 +468,7 @@ while game_display_running:
                         en_passant=True
                     if can_castle(game_board, selected_x, selected_y, x, y, current_player):
                         castle=True
-                    if castle or en_passant or (game_board[selected_x][selected_y]).can_move(game_board, selected_x,selected_y, x,y, current_player):
+                    if castle or en_passant or WC.can_move(game_board[selected_x][selected_y].name, game_board, selected_x,selected_y, x,y, current_player):
                         item_at_target = game_board[x][y]
                         move_piece(game_board, selected_x, selected_y, x, y, current_player)
                         if en_passant:
@@ -456,7 +484,7 @@ while game_display_running:
                             game_board[stored_rook_end_coords[0]][stored_rook_end_coords[1]] = stored_rook
 
                         # If the current player's king is in check, move the piece back
-                        if c.check(game_board, white_king_coords, black_king_coords, current_player):
+                        if WC.check(game_board, white_king_coords, black_king_coords, current_player):
                             print("Invalid move, king in check")
                             move_piece(game_board, x, y, selected_x, selected_y, current_player)
                             game_board[x][y] = item_at_target
