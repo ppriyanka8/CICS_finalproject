@@ -47,12 +47,12 @@ def valid_Pawn(board, a,b,c,d, current_player):
         else:
             return False
     elif current_player == "White" and a==1 and isTargetValidForward(board, a+1, b, c, d, current_player):
-        if isSquareEmpty(board, c,d):
+        if isSquareEmpty(board, c,d) and isSquareEmpty(board, c-1, d):
             return True
         else:
             return False
     elif current_player == "Black" and a==6 and isTargetValidForward(board, a-1, b, c, d, current_player):
-        if isSquareEmpty(board, c,d):
+        if isSquareEmpty(board, c,d) and isSquareEmpty(board, c+1, d):
             return True
         else:
             return False
