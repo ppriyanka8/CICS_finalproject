@@ -244,11 +244,11 @@ def check(board, white_king_coords, black_king_coords, current_player):
             if board[i][j]!=0 and board[i][j].color!=current_player:  #check if the square has a piece
 
                 if board[i][j].color=="White":
-                    if board[i][j].can_move(board, i, j, black_king_coords[0], black_king_coords[1], "White"):
+                    if can_move(board[i][j].name ,board, i, j, black_king_coords[0], black_king_coords[1], "White"):
                         return True
                     
                 elif board[i][j].color=="Black":
-                    if board[i][j].can_move(board, i, j, white_king_coords[0], white_king_coords[1], "Black"):
+                    if can_move(board[i][j].name, board, i, j, white_king_coords[0], white_king_coords[1], "Black"):
                         return True
     return False
 
@@ -263,24 +263,24 @@ class Piece:
         self.color=Color
         self.points=Points
 
-    def can_move(self, board, a, b, c, d, current_player ):
-        if self.name=="Pawn":
-            return valid_Pawn(board, a, b, c, d, current_player)  #it returns whatever gets returned from that fn
-        
-        if self.name=="Rook":
-            return valid_Rook(board,a,b,c,d,current_player)  #the function valid_rook is not defined outside the scope of this class. do i need to pass as an argument in can_move method
-        
-        if self.name=="Bishop":
-            return valid_Bishop(board,a,b,c,d,current_player)
-        
-        if self.name=="Knight":
-            return valid_Knight(board,a,b,c,d,current_player)
-        
-        if self.name=="Queen":
-            return valid_Queen(board,a,b,c,d,current_player)
-        
-        if self.name=="King":
-            return valid_King(board,a,b,c,d,current_player)
+def can_move(name, board, a, b, c, d, current_player ):
+    if name=="Pawn":
+        return valid_Pawn(board, a, b, c, d, current_player)  #it returns whatever gets returned from that fn
+    
+    if name=="Rook":
+        return valid_Rook(board,a,b,c,d,current_player)  #the function valid_rook is not defined outside the scope of this class. do i need to pass as an argument in can_move method
+    
+    if name=="Bishop":
+        return valid_Bishop(board,a,b,c,d,current_player)
+    
+    if name=="Knight":
+        return valid_Knight(board,a,b,c,d,current_player)
+    
+    if name=="Queen":
+        return valid_Queen(board,a,b,c,d,current_player)
+    
+    if name=="King":
+        return valid_King(board,a,b,c,d,current_player)
 
 
 
@@ -363,7 +363,7 @@ def validRange(x):
 #Main Game Loop
 
 def play_game():
-    gameRunning=True
+    gameRunning=False
 
     game_board=initial_board()  #initialise the board
     display_board(game_board)   #print the board  -> it's printing the matrix with objects
@@ -422,7 +422,7 @@ def play_game():
             continue
 
 
-        if (game_board[a][b]).can_move(game_board, a,b, c,d, current_player):   #for (1,0)-> (2,0) it is returning True as it should
+        if can_move(game_board[a][b].name, game_board, a,b, c,d, current_player):   #for (1,0)-> (2,0) it is returning True as it should
             if check(game_board, a, b, c, d, current_player, white_king_coords, black_king_coords):
                 print("Check: Invalid move")
                 
