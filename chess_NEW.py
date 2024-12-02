@@ -1,71 +1,10 @@
 #Main Game Code
 
-def validMove_Parallel(board, current_square,target_square):  #checks if the squares parallely forward to the current square are all empty
-
-    a,b=current_square #unpacks coordinates of original_square into var a & b
-    c,d=target_square
-
-    if b!=d:   #to move in a particular rank, b needs to be same as d
-        print("Invalid Move: b==d not in the same file")
-        return False
-    col=d    #only other condition is that b is same as d-> assign the final col as d
-
-    if c>a:   #looing forward in positive direction (for white)
-        print("c>a")
-        start=a+1
-        end=c+1
-        step=1
-        print(f"a+1: {a+1}")
-
-    else:   #otherwise go negative (for black)
-        start=a-1
-        end=c-1
-        step=-1
-
-    for row in range(start,end,step):   #starts checking from a+1, because a is the currrent position, tht will never be empty square
-        if board[row][col]!=0:
-
-            # are we at the target square? If so, if the piece belongs to opposite player, valid move. Otherwise, invalid move.
-            if row==c:
-                print(f"a,b: {a,b}")
-                print(type(board[a][b]))
-                print(type(board[c][d]))
-                #this function will not work for a pawn. will only work for rooks and queen
-                if board[a][b].name=="Rook" or "Queen":
-
-                    if board[a][b].color=="White" and board[c][d].color=="Black": #[(5,0) should store an object, instead storing an int] #check if the current sq piece is white and target is black
-                        print("White Captured a black piece")
-                        return True
-                    elif board[a][b].color=="Black" and board[c][d].color=="White":
-                        print("Black Captured a white piece")
-                        return True
-                    else:  
-                        return False
-                    
-                elif board[a][b].name=="Pawn":
-                    # if d-1<0:
-
-                    if board[a][b].color=="White" and (board[c][d+1]=="Black" or board[c][d-1]=="Black"):
-                        print("White Captured a black piece")
-                        return True
-                    elif board[a][b].color=="Black" and (board[c][d+1]=="White" or board[c][d-1]=="White"):
-                        print("Black Captured a white piece")
-                        return True
-                    else:
-                        return False
-
-                else:
-                    return False
-            else:
-                    print("validMoveParallel: board[row][col] == 0 that means can move further")
-    return True
-
-
 def isTargetValidPawnDiag(board, a,b, c, d, current_player):#would return True if the target is one of the diagonal
-    if current_player=="White" and c==a+1 and abs(d-b==1):
+    if current_player=="White" and (c==a+1) and abs(d-b)==1:
         return True
 
-    elif current_player=="Black" and c==a-1 and abs(d-b==1):
+    elif current_player=="Black" and (c==a-1) and abs(d-b)==1:
         return True
     return False
         
@@ -107,7 +46,16 @@ def valid_Pawn(board, a,b,c,d, current_player):
             return True
         else:
             return False
-        
+    elif current_player == "White" and a==1 and isTargetValidForward(board, a+1, b, c, d, current_player):
+        if isSquareEmpty(board, c,d):
+            return True
+        else:
+            return False
+    elif current_player == "Black" and a==6 and isTargetValidForward(board, a-1, b, c, d, current_player):
+        if isSquareEmpty(board, c,d):
+            return True
+        else:
+            return False
     return False
 
 #SameFile
@@ -169,10 +117,10 @@ def valid_Rook(board, a,b,c,d,current_player):
             return True
     return False
 
-def isDiagonal(board,a,b,c,d,current_player):
+def isDiagonal(a,b,c,d):
     if abs(c-a)==abs(d-b):
         return True
-    print("Bishop only moves diagonally")
+    #print("Bishop only moves diagonally")
     return False
 
 def loopDiagonalValid(board,a,b,c,d,current_player):
@@ -191,7 +139,7 @@ def loopDiagonalValid(board,a,b,c,d,current_player):
         step_row=1
 
         start_col=b-1
-        end_col=b-1
+        end_col=d-1
         step_col=-1
 
     elif c<a and d>b:
@@ -209,32 +157,41 @@ def loopDiagonalValid(board,a,b,c,d,current_player):
         step_row=-1
 
         start_col=b-1
-        end_col=b-1
+        end_col=d-1
         step_col=-1
 
     for row in range(start_row, end_row, step_row):
         for col in range(start_col, end_col, step_col):
+            if not isDiagonal(row, col, start_row, start_col):
+                #if a == 7 and b == 5:
+                    #print(f"diag:row is {row}, end_row is {end_row}, col is {col}, end_col is {end_col}, color is {board[row][col].color}, player is {current_player}")
+                continue
             if board[row][col]!=0:
                 if (row==end_row+1 or row==end_row-1) and (col==end_col+1 or col==end_col-1) and board[row][col].color!=current_player:
                     return True
                 else:
+                    #if a == 7 and b == 5:
+                        #print(f"row is {row}, end_row is {end_row}, col is {col}, end_col is {end_col}, color is {board[row][col].color}, player is {current_player}")
                     return False
     return True
 
 
 def valid_Bishop(board,a,b,c,d,current_player):
-    if isDiagonal(board,a,b,c,d,current_player):
+    #print(f"Checking diagonal from {a,b} to {c,d}")
+    if isDiagonal(a,b,c,d):
+        #print(f"Checking loop diagonal from {a,b} to {c, d}")
         if loopDiagonalValid(board,a,b,c,d,current_player):
+            #print(f"Loop diagonal valid from {a,b} to {c,d}")
             return True
     return False
     # If not a valid diagonal, return false
     # else return loopDiagonalValid(...)
 
 def KnightValidMove(board, a,b,c,d,current_player):
-    validSquares=[(1,2),(2,1),(-1,2),(-2,1),(2,-1),(-2,-1),(-2,1),(-1,-2)]
+    validSquares=[(1,2),(2,1),(-1,2),(-2,1),(2,-1),(-2,-1),(-1,-2),(1,-2)]
     if (c-a, d-b) in validSquares:
         return True
-    print("Invalid move for Knight")
+    #print("Invalid move for Knight")
     return False
 
 def isTargetSqEmpty(board, a,b,c,d,current_player): #board[c][d] here is 0 because it's empty
@@ -251,6 +208,54 @@ def valid_Knight(board, a,b,c,d,current_player):
         if isTargetSqEmpty(board, a,b,c,d,current_player):
             return True
     return False
+
+def valid_Queen(board, a, b, c, d, current_player):
+    if valid_Rook(board, a, b, c, d, current_player) or valid_Bishop(board, a, b, c, d, current_player):
+        return True
+    #print("Invalid move for a Queen")
+    return False
+
+def KingValidMove(board, a, b, c, d, current_player):
+    validKinSq=[(1,0), (-1,-1), (0,-1), (1,-1), (-1,0), (0,1), (1,1),(-1,1)]
+    if (c-a, d-b) in validKinSq:
+        return True
+    #print("Invalid move for King")
+    return False
+
+def valid_King(board, a, b, c, d, current_player):
+    if KingValidMove(board, a, b, c, d, current_player) and isTargetSqEmpty(board, a,b,c,d,current_player):
+        return True
+    #print("Invalid move for King")
+    return False
+
+#opponent has piece(s) that can capture your king
+
+def check(board, white_king_coords, black_king_coords, current_player):
+    # for piece in board:
+    # if piece is opponent's:
+    # if piece has validPawn/Rook/etc on target_square=white_king_coords/black_king_coords:
+    # return True
+    # if loop completes and nothing returned true, we assume no opponent piece has line of sight to our King
+    # and we can return False (not in check)
+
+    
+    for i in range(8):
+        for j in range(8):
+            if board[i][j]!=0 and board[i][j].color!=current_player:  #check if the square has a piece
+
+                if board[i][j].color=="White":
+                    if board[i][j].can_move(board, i, j, black_king_coords[0], black_king_coords[1], "White"):
+                        return True
+                    
+                elif board[i][j].color=="Black":
+                    if board[i][j].can_move(board, i, j, white_king_coords[0], white_king_coords[1], "Black"):
+                        return True
+    return False
+
+
+def any_checkmate(board, a, b, c, d, current_player):
+    if check(board,a, b, c, d, current_player):
+        pass
 
 class Piece:
     def __init__(self, Name, Color, Points):
@@ -271,19 +276,19 @@ class Piece:
         if self.name=="Knight":
             return valid_Knight(board,a,b,c,d,current_player)
         
-    #     if self.name=="Queen":
-    #         return None
+        if self.name=="Queen":
+            return valid_Queen(board,a,b,c,d,current_player)
         
-    #     if self.name=="King":
-    #         return None
+        if self.name=="King":
+            return valid_King(board,a,b,c,d,current_player)
 
 
 
 
 def initial_board():
     board=[
-        [Piece("Rook", "White", 5), Piece("Knight", "White", 3), Piece("Bishop", "White", 3), Piece("Queen", "White", 9), Piece("King", "White", 88), Piece("Bishop", "White", 3), Piece("Knight", "White", 3), Piece("Rook", "White", 5)], #1-> white; -1-> black
-        [0, Piece("Pawn", "White", 1), Piece("Pawn", "White", 1), Piece("Pawn", "White", 1), 0, Piece("Pawn", "White", 1), Piece("Pawn", "White", 1), Piece("Pawn", "White", 1)], 
+        [Piece("Rook", "White", 5), Piece("Knight", "White", 3), Piece("Bishop", "White", 3), Piece("King", "White", 88), Piece("Queen", "White", 9), Piece("Bishop", "White", 3), Piece("Knight", "White", 3), Piece("Rook", "White", 5)], #1-> white; -1-> black
+        [Piece("Pawn", "White", 1), Piece("Pawn", "White", 1), Piece("Pawn", "White", 1), Piece("Pawn", "White", 1), Piece("Pawn", "White", 1), Piece("Pawn", "White", 1), Piece("Pawn", "White", 1), Piece("Pawn", "White", 1)], 
         [0, 0, 0, 0, 0, 0, 0, 0],          
         [0, 0, 0, 0, 0, 0, 0, 0],          
         [0, 0, 0, 0, 0, 0, 0, 0],          
@@ -347,6 +352,7 @@ def display_board(board):
 
         print(" ".join(display))
     # print("  u'\U+203E', u'\U+203E', u'\U+203E', u'\U+203E' ")
+
 def validRange(x):
     valid_range=[0,1,2,3,4,5,6,7]
     if x in valid_range:
@@ -365,6 +371,9 @@ def play_game():
     
     current_player="White"
     print(f"{current_player}\'s turn")
+
+    white_king_coords = (0,3)
+    black_king_coords = (7,3)
 
 
     while gameRunning: #while this variable is True, the game loop will run. i have initialised ths as true outside of this
@@ -411,9 +420,17 @@ def play_game():
         if game_board[a][b].color!=current_player:
             print(f"{current_player} cannot move {game_board[a][b].color} piece")
             continue
-        
+
+
         if (game_board[a][b]).can_move(game_board, a,b, c,d, current_player):   #for (1,0)-> (2,0) it is returning True as it should
- 
+            if check(game_board, a, b, c, d, current_player, white_king_coords, black_king_coords):
+                print("Check: Invalid move")
+                
+            if game_board[a][b].name == "King":
+                if current_player=="White":
+                    white_king_coords=(c,d)
+                else:
+                    black_king_coords=(c,d)
             game_board[c][d]=game_board[a][b]
             game_board[a][b]=0
 
@@ -426,11 +443,13 @@ def play_game():
         else:
             print("Invalid move")
             print(f"{current_player}'s turn")
+
+        
         display_board(game_board)
 
 
     return None
 
-play_game()
 
-
+# if __name__ == "__main__":
+    # play_game()
