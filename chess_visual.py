@@ -51,34 +51,6 @@ B_Queen=pygame.transform.scale(B_Queen,(SQUARE_SIZE,SQUARE_SIZE))
 B_King=pygame.transform.scale(B_King,(SQUARE_SIZE,SQUARE_SIZE))
 
 
-# ****************** DEFINED "PIECE" CLASS  *****************************
-
-# class Piece:
-#     def __init__(self, Name, Color, Points):
-#         self.name=Name
-#         self.color=Color
-#         self.points=Points
-
-#     def can_move(self, board, a, b, c_pos, d, current_player ):
-#         if self.name=="Pawn":
-#             return WC.valid_Pawn(board, a, b, c_pos, d, current_player)  #it returns whatever gets returned from that fn
-        
-#         if self.name=="Rook":
-#             return WC.valid_Rook(board,a,b,c_pos,d,current_player)  #the function valid_rook is not defined outside the scope of this class. do i need to pass as an argument in can_move method
-        
-#         if self.name=="Bishop":
-#             return WC.valid_Bishop(board,a,b,c_pos,d,current_player)
-        
-#         if self.name=="Knight":
-#             return WC.valid_Knight(board,a,b,c_pos,d,current_player)
-        
-#         if self.name=="Queen":
-#             return WC.valid_Queen(board,a,b,c_pos,d,current_player)
-        
-#         if self.name=="King":
-#             return WC.valid_King(board,a,b,c_pos,d,current_player)
-
-
 # ****************** DEFINED DISPLAY BOARD FUNCTION  ***********************************
 
 #Display board function
@@ -151,10 +123,11 @@ def display_chessboard(board, selected_x, selected_y, current_player):
         else:
             screen.blit(dark_surface, ((7-selected_y)*SQUARE_SIZE, (7-selected_x)*SQUARE_SIZE))
 
-def move_piece(board,a,b,c_pos,d,current_player):
-    if board[a][b].name == "King":
+
+def move_piece(board,a,b,c_pos,d,current_player):  #updates the board(updates king location in white/black_king_coords too along with on the board)
+    if board[a][b].name == "King":       #update king's squae positions to a list(to track)
         if current_player=="White":
-            global white_king_coords
+            global white_king_coords      #declare the global variable white_king_coords where white king's coords are being stored
             white_king_coords=(c_pos,d)
         else:
             global black_king_coords
@@ -163,8 +136,9 @@ def move_piece(board,a,b,c_pos,d,current_player):
     board[c_pos][d]=board[a][b]
     board[a][b]=0
 
+
 def is_in_checkmate(board, current_player):
-    in_check = True
+    in_check = True   #why is this true: assuming it is in check
     if not WC.check(game_board, white_king_coords, black_king_coords, current_player):
         return False
 
@@ -181,7 +155,7 @@ def is_in_checkmate(board, current_player):
                         if x == i and y == j:
                             continue
                         # If the target square cannot be moved to, skip
-                        if not WC.can_move(item.name, board, x, y, i, j, current_player):   #?????
+                        if not WC.can_move(item.name, board, x, y, i, j, current_player):   #if the player cannot move, ????
                             continue
                         # Otherwise, move the piece, see if we're in check still, move it back. Return False (not in checkmate)
                         # if the move got us out of check.
@@ -198,7 +172,7 @@ def is_in_checkmate(board, current_player):
 
                         if not in_check:
                             return False
-    print("Couldnt get out of check")
+    print("Couldn't get out of check")
     return True # We iterated through every piece and none of their moves got us out of check
 
 
@@ -210,7 +184,7 @@ def can_en_passant(board, selected_x, selected_y, x, y, current_player):
     piece = board[selected_x][selected_y]
     if piece == 0:
         return False
-    if last_move[0] == 0:
+    if last_move[0] == 0:    #check if piece has moved
         return False
     if piece.color == "White" and current_player=="White":
         if selected_x==4:
@@ -282,7 +256,7 @@ def can_castle(board, selected_x, selected_y, x, y, current_player):
 
 def get_castling_rook(board, y, current_player):
     if current_player == "White":
-        if y == 1:
+        if y == 1:   #the second square selected needs to be y==1
             return board[0][0]
         else:
             return game_board[0][7]
@@ -375,22 +349,25 @@ game_board=WC.initial_board()    #initialise the board
 current_player="White"           #set the current_player as White
 
 white_king_coords = (0,3)                     #start tracking white king coordinates to keep track of ....
+black_king_coords = (7,3) 
 white_king_has_moved = False                  #track whether white king has moved
-white_queenside_rook_has_moved = False        #track whether white queenside rook has moved to track Castling
-white_kingside_rook_has_moved = False        #track whether white kingside king has moved to track castling
-black_king_coords = (7,3)             
 black_king_has_moved = False
+white_queenside_rook_has_moved = False        #track whether white queenside rook has moved to track Castling
+white_kingside_rook_has_moved = False        #tracks whether white kingside king has moved to track castling
 black_queenside_rook_has_moved = False
 black_kingside_rook_has_moved = False
 
 game_display_running=True       #game-display-running variable keeps updating the screen until is true
-selected_x = None               #????
-selected_y = None               #????
+
+selected_x = None               #highlighted square that player wants to move. x,y derived from the mouse_click_x/y becomes selected_x/y if the right player is moving and the highlighted square is 
+selected_y = None                # occupied and not empty
+
 current_player_in_check=False        #current-player-in-check var
 is_promoting=False                    #is-promoting var
 promoting_pawn_pos=None        #promoting-pawn-pos var : tracks the position of the pawn which is to be promoted-> to bring the promoted pieces at the same square
 promoting_color=None             #promoting-pawn-pos var : tracks the color of the pawn which is to be promoted-> to bring the same color pieces 
 last_move=[0,0,0]             # last-move var tracks every last move on the board; irrespective of color. gets updated after each can_move True
+      # last_move=[game_board[x][y]:Piece,(selected_x, selected_y),(x,y)]
 white_won = False             #initialised white-won variable
 black_won = False
 
@@ -401,25 +378,26 @@ black_won = False
 
 while game_display_running:     #WHILE game-display-running==True: screen will keep updating
     
-    display_chessboard(game_board, selected_x, selected_y, current_player)   #print the board  -> it's printing the matrix with objects
-    if is_promoting:
-        display_promotion_pieces(current_player)
-    if white_won or black_won:
+    display_chessboard(game_board, selected_x, selected_y, current_player)   #render board on screen 
+    if is_promoting:   #check if a piece is promoting before calling for any input. 
+        display_promotion_pieces(current_player)   
+    if white_won or black_won:    #check if any player has already won
         show_winner_text()
     #define another function to display board
             # RENDER YOUR GAME HERE
     pygame.display.flip()  # flip() the display to put your work on screen: update the display
 
     clock.tick(60)  # limits FPS to 60
-    for event in pygame.event.get():
+
+    for event in pygame.event.get():    #pygame.event.get()-> gives all events happened so far
         if event.type == pygame.QUIT:
             game_display_running = False
-        if event.type==pygame.MOUSEBUTTONDOWN:
+        if event.type==pygame.MOUSEBUTTONDOWN:   #get event type MOUSEbuttondown that is when you click on screen
             if white_won or black_won:
-                continue
-            x,y=mouse_click(current_player)
+                continue               #check if a team is already won. then exit out of this while loop after clicking on the screen once
+            x,y=mouse_click(current_player)    #store the coordinates of square in x,y: x corresponds to cols/files, y corr to rows/ranks
             print(f"x,y:{x, y}")
-            if is_promoting:
+            if is_promoting: 
                 # Check to see if piece in our black box was selected
                 # We always put black box and piece selections over x=3 and y spanning from 0-4
                 if current_player == "White":
@@ -435,15 +413,16 @@ while game_display_running:     #WHILE game-display-running==True: screen will k
                         game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = WC.Piece("Rook", promoting_color, 5)
                     elif y == 3:
                         game_board[promoting_pawn_pos[0]][promoting_pawn_pos[1]] = WC.Piece("Queen", promoting_color, 9)
-                    is_promoting = False
-                    promoting_pawn_pos = None
+                        #based on the mouse_click y pieces have been promoted.
+                    is_promoting = False    #since the piece is promoted, make is_promoting = False
+                    promoting_pawn_pos = None   
                     promoting_color = None
-
+                    #we change player now
                     if current_player=="White":
                         current_player="Black"
                     else:
                         current_player="White"
-
+                        #if the promoted piece gives checkmate, game is instantly over
                     if is_in_checkmate(game_board, current_player):
                         print(f"{current_player} is in checkmate. Game Over")
                         if current_player == "White":
@@ -454,34 +433,39 @@ while game_display_running:     #WHILE game-display-running==True: screen will k
                         print(f"{current_player}'s turn")
                 else:
                     print("Please pick a promotion piece")
+            #If the piece is not promoting, we select our first square
             # Selecting our first square
-            elif selected_x == None and selected_y == None:
-                if (game_board[x][y] != 0 and game_board[x][y].color == current_player):
-                    selected_x, selected_y = x, y
+            elif selected_x == None and selected_y == None:    #starting with no selected sq
+                if (game_board[x][y] != 0 and game_board[x][y].color == current_player):  #first see if the square is occupied by opponent
+                    selected_x, selected_y = x, y   #selcted_x, selected_y
+                    print(f"selected_x, slected_y gets updated to : {selected_x, selected_y}")
             else: # Player is picking their second square
                 # If the target square is empty or opponent piece
                 if (game_board[x][y] == 0 or game_board[x][y].color != current_player):
                     # If this is a valid move
                     en_passant = False
                     castle = False
-                    if can_en_passant(game_board, selected_x, selected_y, x, y, current_player):
+                    if can_en_passant(game_board, selected_x, selected_y, x, y, current_player): #check if after selecting the second square, there's a possibility of en passant
                         en_passant=True
-                    if can_castle(game_board, selected_x, selected_y, x, y, current_player):
+                    if can_castle(game_board, selected_x, selected_y, x, y, current_player):  #check if after selecting the second square, there's a possibility of castling
+                        en_passant=True  
                         castle=True
                     if castle or en_passant or WC.can_move(game_board[selected_x][selected_y].name, game_board, selected_x,selected_y, x,y, current_player):
-                        item_at_target = game_board[x][y]
-                        move_piece(game_board, selected_x, selected_y, x, y, current_player)
-                        if en_passant:
+                        item_at_target = game_board[x][y]   #we assign the piece on the target to item_at_target
+                        move_piece(game_board, selected_x, selected_y, x, y, current_player)   #then move the original piece at the target square
+                        if en_passant:   #now if it was an en passant
                             # Remove en passant'd pawn
-                            stored_pawn = last_move[0]
+                            print(f"last_move[0] before assigning {last_move[0]}")
+                            stored_pawn = last_move[0]  #we assign the 
+                            print(f"stored pawn after assigning {stored_pawn}")
                             game_board[last_move[2][0]][last_move[2][1]] = 0
                         if castle:
                             # Move kingside/queenside rook
-                            stored_rook = get_castling_rook(game_board, y, current_player)
+                            stored_rook = get_castling_rook(game_board, y, current_player) #returns piece on that square
                             stored_rook_start_coords = get_castling_rook_start_coords(y, current_player)
                             stored_rook_end_coords = get_castling_rook_end_coords(y, current_player)
                             game_board[stored_rook_start_coords[0]][stored_rook_start_coords[1]] = 0
-                            game_board[stored_rook_end_coords[0]][stored_rook_end_coords[1]] = stored_rook
+                            game_board[stored_rook_end_coords[0]][stored_rook_end_coords[1]] = stored_rook  #assign rook to the new coordinates
 
                         # If the current player's king is in check, move the piece back
                         if WC.check(game_board, white_king_coords, black_king_coords, current_player):
@@ -496,7 +480,10 @@ while game_display_running:     #WHILE game-display-running==True: screen will k
                                 game_board[stored_rook_start_coords[0]][stored_rook_start_coords[1]] = stored_rook
                                 game_board[stored_rook_end_coords[0]][stored_rook_end_coords[1]] = 0
                         else: # Otherwise this is a valid move. Leave the piece there and update current player
-                            last_move=[game_board[x][y],(selected_x, selected_y),(x,y)]
+                            print(f"last move before updating {last_move}")
+                            last_move=[game_board[x][y],(selected_x, selected_y),(x,y)]  
+                            print(f"last move after updating {last_move}")
+
                             # If a king has moved, save that to prevent future castling
                             if game_board[x][y].name == "King":
                                 if current_player == "White":
