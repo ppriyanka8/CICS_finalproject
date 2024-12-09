@@ -1,23 +1,21 @@
-#Main Game Code
 
-def isTargetValidPawnDiag(board, a,b, c, d, current_player):#would return True if the target is one of the diagonal
-    if current_player=="White" and (c==a+1) and abs(d-b)==1:
+#***********Functions defined **********
+def isTargetValidPawnDiag(board, a,b, c, d, current_player): #would return True if the target is one of the diagonal squares relative to the selected_sq
+    if current_player=="White" and (c==a+1) and abs(d-b)==1: #white is increasing the indices
         return True
 
-    elif current_player=="Black" and (c==a-1) and abs(d-b)==1:
+    elif current_player=="Black" and (c==a-1) and abs(d-b)==1:  
         return True
     return False
         
-def isOpponentPiece(board, c,d, current_player): 
-    #check if the target square is opposite color
-    if board[c][d]!=0:
+def isOpponentPiece(board, c,d, current_player):  #check if the target square is opposite color/opponent's piece
+    if board[c][d]!=0:  
         if board[c][d].color!=current_player:
             return True
     return False
 
 def isTargetValidForward(board, a,b, c, d, current_player):
-    #check if the target square is one square forward
-    #check if that is not empty
+    #check if the target square is one square forward in the same file
     if current_player=="White" and c==a+1 and b==d :
         return True
     elif current_player=="Black" and c==a-1 and b==d:
@@ -29,7 +27,6 @@ def isSquareEmpty(board, c, d):
         return True
     return False
 
-# *************
 
 def valid_Pawn(board, a,b,c,d, current_player):
 
@@ -40,7 +37,7 @@ def valid_Pawn(board, a,b,c,d, current_player):
             return False
 
     
-    # Checks if square is 1 in front of pawn
+    # Checks if target square is 1 in front of pawn
     elif isTargetValidForward(board, a,b,c,d, current_player):
         if isSquareEmpty(board, c,d):
             return True
@@ -58,30 +55,32 @@ def valid_Pawn(board, a,b,c,d, current_player):
             return False
     return False
 
-#SameFile
+#***************  Valid ROOK function*********************
+
+#SameFile: checks if target square is on the same file
 def sameFile(board, a,b,c,d,current_player):
     if b==d:
         return True
     return False
 
-def loopFileValid(board, a,b,c,d,current_player):
+def loopFileValid(board, a,b,c,d,current_player): #checks if all the squares, looping through the same file are empty(valid to move)
     col=d
-    if c > a:
+    if c > a:   #moving forward-> increasing indices-> positive "for" lop
         start=a+1
         end=c+1
         step=1
 
-    elif c < a:
+    elif c < a:   #moving downwards-> decreasing indices-> negative "for" lop
         start=a-1
         end=c-1
         step=-1
     for i in range(start,end,step):
-        if board[i][col]!=0:
-            if (i == end-1 or i == end+1) and board[i][col].color!=current_player:
+        if board[i][col]!=0:  #instead if the square is occupied
+            if (i == end-1 or i == end+1) and board[i][col].color!=current_player:  #check if the square is occupied by opponent
                 return True
             else:
                 return False
-    return True
+    return True    #if the squares are empty, return True-> can(valid) move
 
 def sameRank(board, a,b,c,d,current_player):
     if a==c:
@@ -116,6 +115,8 @@ def valid_Rook(board, a,b,c,d,current_player):
         if loopRankValid(board,a,b,c,d,current_player):
             return True
     return False
+
+#***************  Valid BISHOP function *********************
 
 def isDiagonal(a,b,c,d):
     if abs(c-a)==abs(d-b):
@@ -187,6 +188,8 @@ def valid_Bishop(board,a,b,c,d,current_player):
     # If not a valid diagonal, return false
     # else return loopDiagonalValid(...)
 
+# ***************  Valid KNIGHT function*********************
+
 def KnightValidMove(board, a,b,c,d,current_player):
     validSquares=[(1,2),(2,1),(-1,2),(-2,1),(2,-1),(-2,-1),(-1,-2),(1,-2)]
     if (c-a, d-b) in validSquares:
@@ -209,6 +212,8 @@ def valid_Knight(board, a,b,c,d,current_player):
             return True
     return False
 
+#***************  Valid QUEEN function*********************
+
 def valid_Queen(board, a, b, c, d, current_player):
     if valid_Rook(board, a, b, c, d, current_player) or valid_Bishop(board, a, b, c, d, current_player):
         return True
@@ -228,7 +233,7 @@ def valid_King(board, a, b, c, d, current_player):
     #print("Invalid move for King")
     return False
 
-#opponent has piece(s) that can capture your king
+
 
 def check(board, white_king_coords, black_king_coords, current_player):
     # for piece in board:
@@ -239,23 +244,23 @@ def check(board, white_king_coords, black_king_coords, current_player):
     # and we can return False (not in check)
 
     
-    for i in range(8):
+    for i in range(8):    #loop over all squares on board
         for j in range(8):
-            if board[i][j]!=0 and board[i][j].color!=current_player:  #check if the square has a piece
+            if board[i][j]!=0 and board[i][j].color!=current_player:  #check if the square is occupied by opponent
 
-                if board[i][j].color=="White":
+                if board[i][j].color=="White":  #check if any of the white pieces can attack black king
                     if can_move(board[i][j].name ,board, i, j, black_king_coords[0], black_king_coords[1], "White"):
                         return True
                     
-                elif board[i][j].color=="Black":
+                elif board[i][j].color=="Black":   #check if any of the black pieces can attack white king
                     if can_move(board[i][j].name, board, i, j, white_king_coords[0], white_king_coords[1], "Black"):
                         return True
     return False
 
 
-def any_checkmate(board, a, b, c, d, current_player):
-    if check(board,a, b, c, d, current_player):
-        pass
+# def any_checkmate(board, a, b, c, d, current_player):
+#     if check(board,a, b, c, d, current_player):
+#         pass
 
 class Piece:
     def __init__(self, Name, Color, Points):
@@ -265,10 +270,10 @@ class Piece:
 
 def can_move(name, board, a, b, c, d, current_player ):
     if name=="Pawn":
-        return valid_Pawn(board, a, b, c, d, current_player)  #it returns whatever gets returned from that fn
+        return valid_Pawn(board, a, b, c, d, current_player)  
     
     if name=="Rook":
-        return valid_Rook(board,a,b,c,d,current_player)  #the function valid_rook is not defined outside the scope of this class. do i need to pass as an argument in can_move method
+        return valid_Rook(board,a,b,c,d,current_player)  
     
     if name=="Bishop":
         return valid_Bishop(board,a,b,c,d,current_player)
@@ -281,7 +286,6 @@ def can_move(name, board, a, b, c, d, current_player ):
     
     if name=="King":
         return valid_King(board,a,b,c,d,current_player)
-
 
 
 
